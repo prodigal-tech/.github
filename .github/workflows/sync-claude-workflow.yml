@@ -1,0 +1,26 @@
+name: Sync Claude Workflow
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/claude.yml'  # Only runs when claude.yml changes
+  workflow_dispatch: {}  # Allows manual triggering
+
+jobs:
+  sync_claude_workflow:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Copy claude.yml to all repositories
+        uses: derberg/manage-files-in-multiple-repositories@v2
+        with:
+          github_token: ${{ secrets.WORKFLOW_SYNC_TOKEN }}
+          patterns_to_include: '.github/workflows/claude.yml'
+          patterns_to_ignore: '.github/workflows/sync-claude-workflow.yml'  # Replace with the name of this file
+          committer_username: 'RahulGP14'
+          committer_email: 'rahul.gupta@prodigaltech.com'
+          commit_message: "ci: update claude workflow"
