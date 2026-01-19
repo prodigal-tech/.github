@@ -1,0 +1,30 @@
+name: Enforce Repository Settings
+
+on:
+  schedule:
+    # Runs daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  enforce-delete-branch-on-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable delete branch on merge for all repos
+        env:
+          GH_TOKEN: ${{ secrets.ORG_ADMIN_TOKEN }}
+        run: |
+          echo "Fetching all repositories..."
+          repos=$(gh repo list prodigal-tech --limit 500 --json name,deleteBranchOnMerge)
+
+          # Count repos that need updating
+          count=$(echo "$repos" | jq '[.[] | select(.deleteBranchOnMerge == false)] | length')
+          echo "Found $count repositories that need updating"
+
+          # Update repos that don't have the setting enabled
+          echo "$repos" | jq -r '.[] | select(.deleteBranchOnMerge == false) | .name' | while read repo; do
+            echo "Enabling delete branch on merge for: $repo"
+            gh repo edit "prodigal-tech/$repo" --delete-branch-on-merge
+          done
+
+          echo "Done! Updated $count repositories."
