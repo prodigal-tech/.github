@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Enable delete branch on merge for all repos
         env:
-          GH_TOKEN: ${{ secrets.ORG_ADMIN_TOKEN }}
+          GH_TOKEN: ${{ secrets.GLOBAL_GITHUB_HTTPS_TOKEN }}
         run: |
           echo "Fetching all repositories..."
           repos=$(gh repo list prodigal-tech --limit 500 --json name,deleteBranchOnMerge)
